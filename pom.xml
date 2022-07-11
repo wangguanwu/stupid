@@ -13,6 +13,7 @@
         <module>address</module>
         <module>consistency</module>
         <module>system</module>
+        <module>test</module>
     </modules>
     <groupId>com.gw.stupid</groupId>
     <artifactId>stupid-all</artifactId>
@@ -122,12 +123,7 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- Internal libs -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>stupid-config</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>stupid-core</artifactId>
@@ -177,13 +173,13 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>nacos-consistency</artifactId>
+                <artifactId>stupid-consistency</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>nacos-sys</artifactId>
+                <artifactId>stupid-sys</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
