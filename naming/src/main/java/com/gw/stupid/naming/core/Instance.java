@@ -8,7 +8,7 @@ import java.util.Map;
  * @created on 2022-07-11 16:01:00
  * 注册节点信息
  **/
-public class InstanceNode implements Record{
+public class Instance implements Record{
     private static final long serialVersionUID = 8141225246070799659L;
 
     private String ip;
