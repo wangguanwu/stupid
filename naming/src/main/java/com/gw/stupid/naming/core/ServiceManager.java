@@ -3,8 +3,8 @@ package com.gw.stupid.naming.core;
 import com.gw.stupid.naming.consistency.RecordListener;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 管理服务
@@ -15,9 +15,9 @@ import java.util.Map;
 public class ServiceManager implements RecordListener<Service> {
 
     /**
-     *  namespaceId, group:serviceName
+     *  namespaceId, group:serviceName,service
      */
-    private Map<String, Map<String, Service>> serviceMap;
+    private ConcurrentHashMap<String, Map<String, Service>> serviceMap;
 
     /**
      * 注册实例
@@ -26,7 +26,6 @@ public class ServiceManager implements RecordListener<Service> {
      * @param instance
      */
     public void registerInstance(String namespaceId, String serviceName, Instance instance) {
-
     }
 
     @Override
