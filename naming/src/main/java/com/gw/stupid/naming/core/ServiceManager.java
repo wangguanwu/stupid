@@ -1,9 +1,15 @@
 package com.gw.stupid.naming.core;
 
+import com.gw.stupid.common.utils.KeyBuilderUtils;
+import com.gw.stupid.exception.StupidException;
+import com.gw.stupid.naming.consistency.CpService;
 import com.gw.stupid.naming.consistency.RecordListener;
 import com.gw.stupid.naming.utils.NamingUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -21,6 +27,9 @@ public class ServiceManager implements RecordListener<Service>{
      */
     private ConcurrentHashMap<String, Map<String, Service>> coreServiceMap;
 
+    @Resource
+    private CpService cpService;
+
     /**
      * 注册实例
      *
@@ -28,17 +37,54 @@ public class ServiceManager implements RecordListener<Service>{
      * @param serviceName
      * @param instance
      */
-    public void registerInstance(String namespaceId, String serviceName, Instance instance) {
+    public void registerInstance(String namespaceId, String serviceName, Instance instance, boolean isEphemeral) throws StupidException {
+        createEmptyServiceForNamespace(namespaceId, serviceName, true);
+
+        Service service = getService(namespaceId, serviceName);
+
+        if (null == service) {
+            throw new StupidException(StupidException.INVALID_PARAM, "namespaceId: " + namespaceId + " serviceName: " + serviceName);
+        }
+
+        List<Instance> instances = new ArrayList<>();
+
+        instances.add(instance);
+
+        addInstances(namespaceId, serviceName, isEphemeral, instances);
     }
 
-    public Service createEmptyServiceForNamespace(String namespaceId, String serviceName, boolean isEphemeral) {
-        return createServiceIfAbsent(namespaceId, serviceName,null, isEphemeral);
+    public void addInstances(String namespaceId, String serviceName, boolean isEphemeral, List<Instance> instances) throws StupidException {
+        Service service = getService(namespaceId, serviceName);
+        if (service == null) {
+            throw new StupidException(StupidException.INVALID_PARAM, namespaceId + ":" + serviceName);
+        }
+        String key = KeyBuilderUtils.buildInstanceListKey(namespaceId, serviceName, isEphemeral);
+        //todo 优化为可重入读写锁
+        synchronized (service) {
+            List<Instance> toBeAddInstanceList = addInstances(service, isEphemeral, instances);
+            Instances instances1 = new Instances();
+            instances1.setInstanceList(toBeAddInstanceList);
+            cpService.put(key, instances1);
+        }
     }
 
-    public Service createServiceIfAbsent(String namespaceId, String serviceName, Cluster cluster, boolean isEphemeral) {
+    private List<Instance> addInstances(Service service, boolean isEphemeral, List<Instance> instanceList) {
+        return null;
+    }
+
+
+    public Service getService(String nameSpaceId, String serviceName) {
+        return selectService(nameSpaceId, serviceName);
+    }
+
+    public void createEmptyServiceForNamespace(String namespaceId, String serviceName, boolean isEphemeral) {
+         createServiceIfAbsent(namespaceId, serviceName,null, isEphemeral);
+    }
+
+    public void createServiceIfAbsent(String namespaceId, String serviceName, Cluster cluster, boolean isEphemeral) {
         Service service = selectService(namespaceId, serviceName);
         if (null != service) {
-            return service;
+            return;
         }
         service = new Service();
         service.setServiceName(serviceName);
@@ -51,14 +97,13 @@ public class ServiceManager implements RecordListener<Service>{
             cluster.setService(service);
             service.getClusterMap().put(cluster.getName(), cluster);
         }
-        Service result = putServiceAndInit(service);
+        putServiceAndInit(service);
         if (isEphemeral) {
             //todo
         }
-        return result;
     }
 
-    private Service putServiceAndInit(Service service) {
+    private void putServiceAndInit(Service service) {
         String namespaceId = service.getNamespaceId();
         if (coreServiceMap.get(namespaceId) == null) {
             synchronized (coreServiceMap) {
@@ -70,6 +115,7 @@ public class ServiceManager implements RecordListener<Service>{
 
         Map<String, Service> services = coreServiceMap.get(namespaceId);
 
+        services.put(service.getNamespaceId(), service);
     }
 
     public Service selectService(String namespaceId, String serviceName) {

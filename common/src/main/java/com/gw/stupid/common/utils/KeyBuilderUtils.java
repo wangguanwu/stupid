@@ -21,6 +21,14 @@ public class KeyBuilderUtils {
         return buildConsistencyInstanceListKey(namespaceId, serviceName);
     }
 
+    public static String buildInstanceListKey(String namespaceId, String serviceName, boolean isEphemeral) {
+        if (isEphemeral) {
+            return buildEphemeralInstanceListKey(namespaceId, serviceName);
+        }
+        return buildConsistencyInstanceListKey(namespaceId, serviceName);
+    }
+
+
     public static String buildEphemeralInstanceListKey(String namespaceId, String serviceName) {
         return INSTANCE_LIST_KEY_PREFIX +
                 SERVICE_EPHEMERAL_KEY +
