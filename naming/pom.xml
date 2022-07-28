@@ -133,6 +133,11 @@
             <groupId>com.gw.stupid</groupId>
             <artifactId>stupid-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

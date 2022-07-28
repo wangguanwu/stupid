@@ -20,7 +20,7 @@ public interface CpService {
 
     void remove(String key) throws StupidException;
 
-    Datum get(String key) throws StupidException;
+    Datum<? extends Record> get(String key) throws StupidException;
 
 
 }

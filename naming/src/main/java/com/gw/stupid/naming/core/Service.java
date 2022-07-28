@@ -1,11 +1,13 @@
 package com.gw.stupid.naming.core;
 
+import com.gw.stupid.common.constants.NamingConstants;
 import com.gw.stupid.common.validate.Validatable;
+import com.gw.stupid.exception.StupidException;
+import com.gw.stupid.exception.runtime.StupidRuntimeException;
 import com.gw.stupid.naming.consistency.RecordListener;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author guanwu
@@ -68,8 +70,31 @@ public class Service implements Record, RecordListener<Instances> , Validatable 
                 '}';
     }
 
+    public List<Instance> allInstances(boolean ephemeral) {
+
+        List<Instance> allInstances = new LinkedList<>();
+
+        for (Map.Entry<String, Cluster> clusterEntry : clusterMap.entrySet()) {
+
+            allInstances.addAll(clusterEntry.getValue().allInstance(ephemeral));
+
+        }
+        return allInstances;
+    }
+
     @Override
     public void validate() {
 
+        if (getServiceName() == null) {
+            throw new StupidRuntimeException(StupidException.INVALID_PARAM, "serviceName is null");
+        }
+
+        if (!getServiceName().matches(NamingConstants.SERVICE_NAME_RULES)) {
+            throw new StupidRuntimeException(StupidException.INVALID_PARAM, "serviceName非法: " + NamingConstants.SERVICE_NAME_RULES);
+        }
+
+        for (Validatable validatable : getClusterMap().values()) {
+            validatable.validate();
+        }
     }
 }

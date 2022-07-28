@@ -3,12 +3,15 @@ package com.gw.stupid.naming.core;
 import com.gw.stupid.common.utils.KeyBuilderUtils;
 import com.gw.stupid.exception.StupidException;
 import com.gw.stupid.naming.consistency.CpService;
+import com.gw.stupid.naming.consistency.Datum;
 import com.gw.stupid.naming.consistency.RecordListener;
+import com.gw.stupid.naming.core.enums.InstanceOperation;
 import com.gw.stupid.naming.utils.NamingUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,6 +74,58 @@ public class ServiceManager implements RecordListener<Service>{
     private List<Instance> addInstances(Service service, boolean isEphemeral, List<Instance> instanceList) {
         return null;
     }
+
+    /**
+     * 这个方法实际上没有改变注册表里面的结构，只是复制了一份数据放到一个新创建的list里，基于这个list修改
+     * 利用Copy-On-Write思想提升并发性能；
+     * 如果是保证CP，那就只能走完一致性协议算法的流程才能更新注册表的结构，以确保CP性质
+     * @param service
+     * @param isEphemeral
+     * @param op
+     * @return
+     */
+    public List<Instance> getUpdateInstance(Service service, boolean isEphemeral, InstanceOperation op)
+    throws StupidException {
+
+        Datum<Instances> instancesDatum = (Datum<Instances>) cpService.get(KeyBuilderUtils.buildInstanceListKey(service.getNamespaceId(),
+                service.getServiceName(), isEphemeral));
+
+        List<Instance> currentInstances = service.allInstances(isEphemeral);
+
+        Map<String, Instance> currentInstanceMap = new HashMap<>(currentInstances.size());
+
+        for (Instance currentInstance : currentInstances) {
+            currentInstanceMap.put(currentInstance.getIpAndPort(), currentInstance);
+        }
+
+
+
+
+    }
+
+    private Map<String, Instance> updateInstancesAndGet(Map<String, Instance> currentInstance,
+                                      List<Instance> toBeUpdateInstances) {
+
+        Map<String, Instance> instanceMap = new HashMap<>(toBeUpdateInstances.size());
+
+        for (Instance toBeUpdateInstance : toBeUpdateInstances) {
+
+            Instance currIp = currentInstance.get(toBeUpdateInstance.getIpAndPort());
+
+            if (currIp != null) {
+
+                toBeUpdateInstance.setHealthy(currIp.isHealthy());
+
+                toBeUpdateInstance.setLastBeatMillis(currIp.getLastBeatMillis());
+
+                //todo 放置到InstanceMap
+            }
+        }
+
+        return instanceMap;
+    }
+
+
 
 
     public Service getService(String nameSpaceId, String serviceName) {
