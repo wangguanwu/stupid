@@ -77,6 +77,6 @@ public class Instance implements Record{
     }
 
     public String getInstanceId() {
-
+        return null;
     }
 }

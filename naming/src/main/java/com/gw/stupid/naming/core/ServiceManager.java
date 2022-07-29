@@ -98,7 +98,7 @@ public class ServiceManager implements RecordListener<Service>{
             currentInstanceMap.put(currentInstance.getIpAndPort(), currentInstance);
         }
 
-
+        return null;
 
 
     }
