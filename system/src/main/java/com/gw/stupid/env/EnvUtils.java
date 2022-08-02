@@ -1,17 +1,19 @@
 package com.gw.stupid.env;
 
 import com.gw.stupid.util.InetUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.util.StringUtils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -38,10 +40,18 @@ public class EnvUtils {
 
     private static String stupidHome = null;
 
-    private static ConfigurableEnvironment configurableEnvironment = null;
+    private static final String DEFAULT_CONFIG_NAME = "application.properties";
 
-    public static ConfigurableEnvironment getConfigurableEnvironment() {
-        return configurableEnvironment;
+    private static final String EXT_CONFIG_PATH_KEY = "stupid.spring.config.ext";
+
+    private static ConfigurableEnvironment environment = null;
+
+    public static void setEnvironment(ConfigurableEnvironment env) {
+        EnvUtils.environment = env;
+    }
+
+    public static ConfigurableEnvironment getEnvironment() {
+        return environment;
     }
 
     public static Boolean getIsStandalone() {
@@ -70,25 +80,25 @@ public class EnvUtils {
     }
 
     public static String getProperty(String key) {
-        return configurableEnvironment.getProperty(key);
+        return environment.getProperty(key);
     }
 
     public static String getProperty(String key, String defaultValue) {
-        return configurableEnvironment.getProperty(key, defaultValue);
+        return environment.getProperty(key, defaultValue);
     }
 
     public static<T> T getProperty(String key, Class<T> clazz) {
-        return configurableEnvironment.getProperty(key, clazz);
+        return environment.getProperty(key, clazz);
     }
 
     public static<T> T getProperty(String key, Class<T> clazz, T defaultValue) {
-        return configurableEnvironment.getProperty(key, clazz, defaultValue);
+        return environment.getProperty(key, clazz, defaultValue);
     }
 
     public static List<String> getPropertyList(String key) {
         List<String> valueList = new LinkedList<>();
         for(int i = 0; i < Integer.MAX_VALUE ;i++) {
-            String v = getConfigurableEnvironment().getProperty(key + "[" + i + "]");
+            String v = getEnvironment().getProperty(key + "[" + i + "]");
             if (StringUtils.isEmpty(v)) {
                 break;
             }
@@ -103,7 +113,6 @@ public class EnvUtils {
         }
         return localAddress;
     }
-
 
     public static int getPort() {
         if (port == -1) {
@@ -126,11 +135,34 @@ public class EnvUtils {
 
     }
 
+    private static String FILE_PATH_PREFIX = "file:";
+
+    public static Resource getCustomFileResource() {
+        String path  = getProperty(EXT_CONFIG_PATH_KEY);
+        if (StringUtils.isNotEmpty(path) && path.startsWith(FILE_PATH_PREFIX)) {
+            String []paths = path.split(",",-1);
+            String resourcePath = paths[paths.length-1].substring(FILE_PATH_PREFIX.length());
+            return getRelativeResource(resourcePath, DEFAULT_CONFIG_NAME);
+        }
+        return null;
+    }
 
     public static Resource getDefaultResource() {
-        InputStream inputStream = EnvUtils.class.getResourceAsStream("/application.properties");
+        InputStream inputStream = EnvUtils.class.getResourceAsStream(String.format("/%s", DEFAULT_CONFIG_NAME));
         assert inputStream != null;
         return new InputStreamResource(inputStream);
+    }
+
+    public static Resource getAppConfigFileResource() {
+        Resource customResource = getCustomFileResource();
+        if (Objects.nonNull(customResource)) {
+            return customResource;
+        }
+        return getDefaultResource();
+    }
+
+    public static Map<String, ?> loadProperties(Resource resource) throws IOException {
+        return new OriginTrackedPropertiesLoader(resource).load();
     }
 
 }
