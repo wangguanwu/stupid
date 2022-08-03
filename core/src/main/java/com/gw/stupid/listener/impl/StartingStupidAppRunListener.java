@@ -97,6 +97,9 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
         }
     }
 
+    /**
+     * 注册监听器，监听应用配置文件是否变更
+     */
     private void registerWatcher() {
         //todo
     }
