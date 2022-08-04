@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * @created on 2022-08-01 19:27:10
  **/
 
+
 @Slf4j
 public class StartingStupidAppRunListener implements StupidApplicationRunListener {
 
@@ -44,7 +45,7 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
 
     private volatile boolean starting = false;
 
-    private ScheduledExecutorService scheduledExecutorService = null;
+    private ScheduledExecutorService loggingStartScheduleService = null;
 
     @Override
     public void starting() {
@@ -73,7 +74,7 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
     }
 
     private void initializeSystemProperties(ConfigurableEnvironment configurableEnvironment) {
-        if (EnvUtils.getIsStandalone()) {
+        if (EnvUtils.isStandalone()) {
             System.setProperty(MODE_PROPERTY_KEY_STAND_MODE, "stand alone");
         } else {
             System.setProperty(MODE_PROPERTY_KEY_STAND_MODE, "cluster");
@@ -144,6 +145,14 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
             }
         }
     }
+
+    private void logClusterConf() {
+        if (EnvUtils.isStandalone()) {
+            return;
+        }
+        log.info();
+    }
+
 
     @Override
     public void contextPrepared(ConfigurableApplicationContext configurableApplicationContext) {

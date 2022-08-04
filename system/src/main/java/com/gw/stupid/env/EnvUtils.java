@@ -1,20 +1,16 @@
 package com.gw.stupid.env;
 
+import com.gw.stupid.common.utils.IOUtils;
 import com.gw.stupid.util.InetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 环境属性工具类
@@ -54,7 +50,7 @@ public class EnvUtils {
         return environment;
     }
 
-    public static Boolean getIsStandalone() {
+    public static Boolean isStandalone() {
         if (Objects.isNull(isStandalone)) {
             isStandalone = Boolean.getBoolean(EnvConstants.STANDALONE_MODE_KEYS);
         }
@@ -62,6 +58,34 @@ public class EnvUtils {
     }
 
     private static String confPath = "";
+
+    public static String getClusterConfig() {
+        return Paths.get(getStupidHome(),
+                "conf",
+                "cluster.conf")
+                .toString();
+    }
+
+    public static List<String> readClusterConfig() throws IOException{
+        List<String> ips = new ArrayList<>();
+        try (Reader r = new InputStreamReader(new FileInputStream(EnvUtils.getClusterConfig()),
+                StandardCharsets.UTF_8)) {
+            List<String> contents = IOUtils.readLines(r);
+            String sharpComment = "#";
+            //ip:port,ip2:port,ip3:port
+            for (String content : contents) {
+                if (content.startsWith(sharpComment)) {
+                    continue;
+                }
+
+                //todo 处理集群ip节点信息
+            }
+
+        } catch (FileNotFoundException ex) {
+
+        }
+        return ips;
+    }
 
     public static String getConfPath() {
         if (StringUtils.isNotEmpty(confPath)) {

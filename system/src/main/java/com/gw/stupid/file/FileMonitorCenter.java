@@ -1,6 +1,6 @@
 package com.gw.stupid.file;
 
-import com.gw.stupid.common.executors.ExecutorFactoryUtils;
+import com.gw.stupid.common.executors.ExecutorUtils;
 import com.gw.stupid.common.executors.NamedThreadFactory;
 import com.gw.stupid.enums.ApiErrorCodeEnum;
 import com.gw.stupid.exception.runtime.StupidRuntimeException;
@@ -99,7 +99,7 @@ public class FileMonitorCenter {
                 throw new IllegalArgumentException("Must be a file directory: " + monitorPaths);
             }
 
-            this.executorService = ExecutorFactoryUtils.
+            this.executorService = ExecutorUtils.
                     newSingleExecutor(new NamedThreadFactory("stupid-monitor-file-" + monitorPaths));
 
             try {

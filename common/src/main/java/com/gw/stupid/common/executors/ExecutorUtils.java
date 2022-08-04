@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadFactory;
  * @author guanwu
  * @created on 2022-08-03 16:27:49
  **/
-public final class ExecutorFactoryUtils {
+public final class ExecutorUtils {
 
     private static ExecutorFactory executorFactory;
 
