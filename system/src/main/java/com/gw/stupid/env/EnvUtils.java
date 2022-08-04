@@ -61,6 +61,18 @@ public class EnvUtils {
         return isStandalone;
     }
 
+    private static String confPath = "";
+
+    public static String getConfPath() {
+        if (StringUtils.isNotEmpty(confPath)) {
+            return confPath;
+        }
+
+        EnvUtils.confPath = Paths.get(getStupidHome(), "conf").toString();
+
+        return EnvUtils.confPath;
+    }
+
     public static String getStupidTmpDir() {
         if (Objects.isNull(stupidTmpDir)) {
             stupidTmpDir = Paths.get(stupidHome, "data", "tmp").toString();

@@ -77,6 +77,14 @@
             <groupId>com.gw.stupid</groupId>
             <artifactId>stupid-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.gw.stupid</groupId>
+            <artifactId>stupid-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.gw.stupid</groupId>
+            <artifactId>stupid-common</artifactId>
+        </dependency>
 
     </dependencies>
 

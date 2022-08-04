@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadFactory;
  * @author guanwu
  * @created on 2022-08-03 16:27:49
  **/
-public final class SExecutors {
+public final class ExecutorFactoryUtils {
 
     private static ExecutorFactory executorFactory;
 
@@ -31,9 +31,13 @@ public final class SExecutors {
 
     public static ExecutorService newManagedFixedSchedule(String group, int nThreads, ThreadFactory threadFactory) {
         ExecutorService executorService = DEFAULT_FACTORY.newFixedExecutorService(nThreads, threadFactory);
-
-        ThreadPoolManager.getInstance().register(group, executorService);
-
+        ThreadPoolManager.registerExecutor(group, executorService);
         return executorService;
+    }
+
+    public static ExecutorService newManagedSingleFixedSchedule(String group, ThreadFactory threadFactory) {
+        ExecutorService singleExecutor = DEFAULT_FACTORY.newSingleExecutorService(threadFactory);
+        ThreadPoolManager.registerExecutor(group, singleExecutor);
+        return singleExecutor;
     }
 }

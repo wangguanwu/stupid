@@ -3,15 +3,20 @@ package com.gw.stupid.listener.impl;
 import com.gw.stupid.enums.ApiErrorCodeEnum;
 import com.gw.stupid.env.EnvUtils;
 import com.gw.stupid.exception.runtime.StupidRuntimeException;
+import com.gw.stupid.file.AbstractSortableFileChangeListener;
+import com.gw.stupid.file.FileChangeEvent;
+import com.gw.stupid.file.FileMonitorCenter;
 import com.gw.stupid.listener.StupidApplicationRunListener;
 import com.gw.stupid.util.FileSystemUtils;
 import com.gw.stupid.util.InetUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.env.OriginTrackedMapPropertySource;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,7 +106,23 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
      * 注册监听器，监听应用配置文件是否变更
      */
     private void registerWatcher() {
-        //todo
+
+        FileMonitorCenter.registerFileWatchListener(EnvUtils.getConfPath(), new AbstractSortableFileChangeListener() {
+            @Override
+            public void onChange(FileChangeEvent event) {
+                try {
+                    Map<String, ?> propertyMap = EnvUtils.loadProperties(EnvUtils.getAppConfigFileResource());
+                    PROPERTY_MAP.putAll(propertyMap);
+                } catch (IOException e) {
+                    log.error("Failed to monitor file", e);
+                }
+            }
+
+            @Override
+            public boolean interest(String path) {
+                return StringUtils.contains(path, "application.properties");
+            }
+        });
     }
 
     /**

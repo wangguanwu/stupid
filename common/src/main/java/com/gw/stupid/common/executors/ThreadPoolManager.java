@@ -61,6 +61,12 @@ public class ThreadPoolManager {
         executorManager.remove(group);
     }
 
+    public static void registerExecutor(String group, ExecutorService executorService) {
+        getInstance().register(group, executorService);
+    }
 
+    public static void deregisterExecutor(String group, ExecutorService executorService) {
+        getInstance().deregister(group);
+    }
 
 }
