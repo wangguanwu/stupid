@@ -25,6 +25,10 @@ public class Datum<T extends Record> implements Serializable {
         this.value = value;
     }
 
+    public T getValue() {
+        return value;
+    }
+
     public static<T extends Record> Datum<T> createInstance(String key, T value) {
         return new Datum<T>(key, value);
     }

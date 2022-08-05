@@ -1,5 +1,6 @@
 package com.gw.stupid.naming.core;
 
+import com.gw.stupid.naming.utils.NamingUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -77,6 +78,25 @@ public class Instance implements Record{
     }
 
     public String getInstanceId() {
-        return null;
+        return this.instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public String getDatumKey() {
+        if (this.port > 0) {
+            return ip + ":" + port + ":" + NamingUtils.LOCALHOST_SITE + ":" + clusterName;
+        }
+        return ip + ":" + NamingUtils.LOCALHOST_SITE + ":" + clusterName;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public String getServiceName() {
+        return serviceName;
     }
 }

@@ -84,4 +84,8 @@ public class Cluster implements Record, Validatable {
             throw ExceptionsHelper.createRuntimeException(ApiErrorCodeEnum.ARGS_INVALID);
         }
     }
+
+    public void init() {
+        //todo 执行初始化方法
+    }
 }

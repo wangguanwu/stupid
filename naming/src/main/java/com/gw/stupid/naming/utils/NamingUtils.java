@@ -1,9 +1,15 @@
 package com.gw.stupid.naming.utils;
 
 
+import java.util.Set;
+
 public class NamingUtils {
 
-    public static String GROUP_DELIMITER = ":";
+    public static final String GROUP_DELIMITER = ":";
+
+    public static final String LOCALHOST_SITE = "localhost-site";
+
+    public static final String INSTANCE_GENERATE_KEY = "instance.generate.alg";
 
     public static String parseApp(String serviceName) {
         if (null == serviceName){
@@ -25,5 +31,9 @@ public class NamingUtils {
             return split[0];
         }
         throw new IllegalArgumentException("Service name :" +serviceName +" is illegal");
+    }
+
+    public static String generateInstanceId(Set<String> existInstanceIdSet) {
+
     }
 }

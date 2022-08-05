@@ -1,5 +1,9 @@
 package com.gw.stupid.listener.impl;
 
+import com.gw.stupid.common.constants.CommonConstants;
+import com.gw.stupid.common.executors.ExecutorUtils;
+import com.gw.stupid.common.executors.NamedThreadFactory;
+import com.gw.stupid.common.executors.ThreadPoolManager;
 import com.gw.stupid.enums.ApiErrorCodeEnum;
 import com.gw.stupid.env.EnvUtils;
 import com.gw.stupid.exception.runtime.StupidRuntimeException;
@@ -19,8 +23,10 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 注册中心监听器的实现
@@ -45,7 +51,7 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
 
     private volatile boolean starting = false;
 
-    private ScheduledExecutorService loggingStartScheduleService = null;
+    private ScheduledExecutorService logStartingScheduledService = null;
 
     @Override
     public void starting() {
@@ -108,7 +114,7 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
      */
     private void registerWatcher() {
 
-        FileMonitorCenter.registerFileWatchListener(EnvUtils.getConfPath(), new AbstractSortableFileChangeListener() {
+        boolean ok = FileMonitorCenter.registerFileWatchListener(EnvUtils.getConfPath(), new AbstractSortableFileChangeListener() {
             @Override
             public void onChange(FileChangeEvent event) {
                 try {
@@ -124,6 +130,9 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
                 return StringUtils.contains(path, "application.properties");
             }
         });
+        if (!ok) {
+            log.warn("Register watcher failed!");
+        }
     }
 
     /**
@@ -150,28 +159,62 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
         if (EnvUtils.isStandalone()) {
             return;
         }
-        log.info();
+        log.info("Stupid cluster config ip list: {} ", String.join(EnvUtils.getClusterConfig(), CommonConstants.COMMA_DELIMIETER));
+    }
+
+    private void logStarting() {
+        if (!EnvUtils.isStandalone()) {
+            this.logStartingScheduledService = ExecutorUtils.newSingleScheduleExecutor(
+                    new NamedThreadFactory("stupid-starting-logger-task"));
+            this.logStartingScheduledService.scheduleWithFixedDelay(() -> {
+                if (StartingStupidAppRunListener.this.starting) {
+                    log.info("Stupid is starting...");
+                }
+            }, 1, 1, TimeUnit.SECONDS);
+        }
     }
 
 
     @Override
     public void contextPrepared(ConfigurableApplicationContext configurableApplicationContext) {
+        logClusterConf();
 
+        logStarting();
     }
 
     @Override
     public void contextLoaded(ConfigurableApplicationContext context) {
-
+        log.info("Stupid context loaded...");
     }
 
     @Override
     public void running(ConfigurableApplicationContext context) {
+        log.info("Stupid App is running...");
 
     }
 
     @Override
     public void failed(ConfigurableApplicationContext context, Throwable er) {
+        starting = false;
 
+        createWorkDirectory();
 
+        ThreadPoolManager.shutdown();
+
+        FileMonitorCenter.shutdown();
+
+        //todo NotifyCenter.shutdown()
+
+        closeLoggingStartExecutor();
+
+        log.error("Stupid startup to fail. Please see {} for more details",
+                Paths.get(EnvUtils.getStupidHome(), "logs/stupid.log"));
+    }
+
+    private void closeLoggingStartExecutor() {
+        if (Objects.nonNull(logStartingScheduledService) &&
+                !(logStartingScheduledService.isShutdown() || logStartingScheduledService.isTerminated())) {
+            logStartingScheduledService.shutdownNow();
+        }
     }
 }

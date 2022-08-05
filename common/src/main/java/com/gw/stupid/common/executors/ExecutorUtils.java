@@ -1,6 +1,7 @@
 package com.gw.stupid.common.executors;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -17,11 +18,11 @@ public final class ExecutorUtils {
         return DEFAULT_FACTORY.newSingleExecutorService(threadFactory);
     }
 
-    public static ExecutorService newSingleScheduleExecutor(ThreadFactory threadFactory) {
+    public static ScheduledExecutorService newSingleScheduleExecutor(ThreadFactory threadFactory) {
         return DEFAULT_FACTORY.newSingleScheduledExecutorService(threadFactory);
     }
 
-    public static ExecutorService newFixedScheduleExecutor(int nThreads, ThreadFactory threadFactory) {
+    public static ScheduledExecutorService newFixedScheduleExecutor(int nThreads, ThreadFactory threadFactory) {
         return DEFAULT_FACTORY.newScheduledExecutorService(nThreads, threadFactory);
     }
 

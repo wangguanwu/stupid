@@ -46,9 +46,7 @@ public class FileMonitorCenter {
         if (CURRENT_MONITOR_DIRS_COUNT == MAX_MONITOR_JOBS) {
             return false;
         }
-
         DirMonitorTask dirMonitorTask = LISTENER_MANAGERS.get(paths);
-
         if (dirMonitorTask == null) {
             dirMonitorTask = new DirMonitorTask(paths);
             dirMonitorTask.start();

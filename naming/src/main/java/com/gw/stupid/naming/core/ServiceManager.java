@@ -7,13 +7,11 @@ import com.gw.stupid.naming.consistency.Datum;
 import com.gw.stupid.naming.consistency.RecordListener;
 import com.gw.stupid.naming.core.enums.InstanceOperation;
 import com.gw.stupid.naming.utils.NamingUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -23,6 +21,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
  */
 
 @Component
+@Slf4j
 public class ServiceManager implements RecordListener<Service>{
 
     /**
@@ -71,8 +70,8 @@ public class ServiceManager implements RecordListener<Service>{
         }
     }
 
-    private List<Instance> addInstances(Service service, boolean isEphemeral, List<Instance> instanceList) {
-        return null;
+    private List<Instance> addInstances(Service service, boolean isEphemeral, List<Instance> instanceList) throws StupidException {
+        return updateInstances(service, instanceList, isEphemeral, InstanceOperation.ADD);
     }
 
     /**
@@ -84,11 +83,9 @@ public class ServiceManager implements RecordListener<Service>{
      * @param op
      * @return
      */
-    public List<Instance> getUpdateInstance(Service service, boolean isEphemeral, InstanceOperation op)
+    public List<Instance> updateInstances(Service service, List<Instance> instanceList,
+                                          boolean isEphemeral, InstanceOperation op)
     throws StupidException {
-
-        Datum<Instances> instancesDatum = (Datum<Instances>) cpService.get(KeyBuilderUtils.buildInstanceListKey(service.getNamespaceId(),
-                service.getServiceName(), isEphemeral));
 
         List<Instance> currentInstances = service.allInstances(isEphemeral);
 
@@ -98,17 +95,63 @@ public class ServiceManager implements RecordListener<Service>{
             currentInstanceMap.put(currentInstance.getIpAndPort(), currentInstance);
         }
 
-        return null;
+        Datum<?> datum =  cpService.
+                get(KeyBuilderUtils.buildInstanceListKey(service.getNamespaceId(),
+                        service.getServiceName(), isEphemeral));
 
+        Map<String, Instance> instanceMap = new HashMap<>();
 
+        if (datum != null && datum.value != null) {
+
+            instanceMap = updateCpInstanceState(currentInstanceMap,
+                    ((Instances)(datum.value)).getInstanceList());
+        } else {
+            instanceMap = new HashMap<>();
+        }
+
+        return operateInstances(service, instanceList, instanceMap, op);
     }
 
-    private Map<String, Instance> updateInstancesAndGet(Map<String, Instance> currentInstance,
-                                      List<Instance> toBeUpdateInstances) {
+    private List<Instance> operateInstances(Service service, List<Instance> newInstances, Map<String, Instance> cpMap,
+                                           InstanceOperation op) {
+        for (Instance is : newInstances) {
 
-        Map<String, Instance> instanceMap = new HashMap<>(toBeUpdateInstances.size());
+            Instance existInstance = cpMap.get(is.getDatumKey());
+            if (!service.getClusterMap().containsKey(is.getClusterName())) {
+                Cluster cluster = new Cluster(service, is.getClusterName());
+                cluster.init();
+                service.getClusterMap().put(cluster.getName(), cluster);
+                log.warn("Cluster not found, ip:{} will create cluster {}", is.getIpAndPort(), cluster.getName());
+            }
+            switch (op) {
+                case DELETE:
 
-        for (Instance toBeUpdateInstance : toBeUpdateInstances) {
+                    cpMap.remove(is.getIpAndPort());
+                    break;
+
+                case ADD:
+
+                    if (existInstance != null) {
+                        is.setInstanceId(existInstance.getInstanceId());
+                    } else {
+                        //todo 设置instanceId
+                        is.setInstanceId(null);
+                    }
+
+                default:
+                    cpMap.put(is.getDatumKey(), is);
+                    break;
+            }
+        }
+        return new ArrayList<>(cpMap.values());
+    }
+
+    private Map<String, Instance> updateCpInstanceState(Map<String, Instance> currentInstance,
+                                                        List<Instance> cpInstance) {
+
+        Map<String, Instance> instanceMap = new HashMap<>(cpInstance.size());
+
+        for (Instance toBeUpdateInstance : cpInstance) {
 
             Instance currIp = currentInstance.get(toBeUpdateInstance.getIpAndPort());
 
@@ -118,8 +161,8 @@ public class ServiceManager implements RecordListener<Service>{
 
                 toBeUpdateInstance.setLastBeatMillis(currIp.getLastBeatMillis());
 
-                //todo 放置到InstanceMap
             }
+            instanceMap.put(toBeUpdateInstance.getDatumKey(), toBeUpdateInstance);
         }
 
         return instanceMap;
@@ -154,7 +197,7 @@ public class ServiceManager implements RecordListener<Service>{
         }
         putServiceAndInit(service);
         if (isEphemeral) {
-            //todo
+            //todo AP性质待实现
         }
     }
 

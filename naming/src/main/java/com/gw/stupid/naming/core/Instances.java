@@ -14,6 +14,10 @@ public class Instances implements Record, Serializable {
 
     }
 
+    public List<Instance> getInstanceList() {
+        return this.instanceList;
+    }
+
     public void setInstanceList(List<Instance> list) {
         this.instanceList = list;
     }

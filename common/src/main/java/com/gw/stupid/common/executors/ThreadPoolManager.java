@@ -1,8 +1,10 @@
 package com.gw.stupid.common.executors;
 
+import com.gw.stupid.common.utils.ThreadPoolUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -59,6 +61,7 @@ public class ThreadPoolManager {
 
     public void deregister(String group) {
         executorManager.remove(group);
+        log.warn("ThreadPoolManager remove executor group:{}", group);
     }
 
     public static void registerExecutor(String group, ExecutorService executorService) {
@@ -67,6 +70,25 @@ public class ThreadPoolManager {
 
     public static void deregisterExecutor(String group, ExecutorService executorService) {
         getInstance().deregister(group);
+    }
+
+    public void shutdownServices() {
+        if (!closed.compareAndSet(false, true)) {
+            return;
+        }
+        log.info("ThreadPoolManager shutdown  executor service...");
+        for (Map.Entry<String, Set<ExecutorService>> entry : executorManager.entrySet()) {
+            Set<ExecutorService> executorSet = entry.getValue();
+            for (ExecutorService executorService : executorSet) {
+                ThreadPoolUtils.shutdown(executorService);
+            }
+        }
+        executorManager.clear();
+        executorManager = null;
+    }
+
+    public static void shutdown() {
+        getInstance().shutdownServices();
     }
 
 }

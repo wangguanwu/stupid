@@ -1,5 +1,6 @@
 package com.gw.stupid.env;
 
+import com.gw.stupid.common.constants.CommonConstants;
 import com.gw.stupid.common.utils.IOUtils;
 import com.gw.stupid.util.InetUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 环境属性工具类
@@ -78,11 +80,16 @@ public class EnvUtils {
                     continue;
                 }
 
-                //todo 处理集群ip节点信息
+                int commaIndex = content.indexOf(CommonConstants.COMMA_DELIMIETER);
+                if (commaIndex > -1) {
+                    ips.addAll(Arrays
+                            .stream(content.split(CommonConstants.COMMA_DELIMIETER))
+                            .map(StringUtils::trim)
+                            .collect(Collectors.toList()));
+                } else {
+                    ips.add(StringUtils.trim(content));
+                }
             }
-
-        } catch (FileNotFoundException ex) {
-
         }
         return ips;
     }
