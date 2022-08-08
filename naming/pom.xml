@@ -138,6 +138,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.gw.stupid</groupId>
+            <artifactId>stupid-system</artifactId>
+            <version>0.1.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

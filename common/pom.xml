@@ -19,6 +19,10 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.gw.stupid</groupId>
+            <artifactId>stupid-api</artifactId>
+        </dependency>
     </dependencies>
 
 

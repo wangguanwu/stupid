@@ -3,6 +3,7 @@ package com.gw.stupid.env;
 import com.gw.stupid.common.constants.CommonConstants;
 import com.gw.stupid.common.utils.IOUtils;
 import com.gw.stupid.util.InetUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.InputStreamResource;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
  * @author guanwu
  * @created on 2022-07-29 09:17:43
  **/
+
+@Slf4j
 public class EnvUtils {
 
     public static final String STANDALONE_MODE = "standalone";
@@ -42,7 +45,22 @@ public class EnvUtils {
 
     private static final String EXT_CONFIG_PATH_KEY = "stupid.spring.config.ext";
 
+    private static final String INSTANCE_ID_GENERATOR_KEY = "instance.id.generator.class.name";
+
+    private static final String INSTANCE_ID_CONFIG_GENERATOR_KEY = "instance.id.generator.conf.class.name";
+
+    private static final String DEFAULT_INSTANCE_ID_GENERATOR_CLASSNAME = "com.gw.stupid.common.keygen.SimpleDistributedGenerator";
+
+    private static String INSTANCE_ID_GENERATOR_CLASSNAME = "";
+
     private static ConfigurableEnvironment environment = null;
+
+    static {
+        String generatorClassName = System.getProperty(INSTANCE_ID_GENERATOR_KEY);
+        if (StringUtils.isNotEmpty(generatorClassName)) {
+            INSTANCE_ID_GENERATOR_CLASSNAME = generatorClassName;
+        }
+    }
 
     public static void setEnvironment(ConfigurableEnvironment env) {
         EnvUtils.environment = env;
@@ -206,6 +224,22 @@ public class EnvUtils {
 
     public static Map<String, ?> loadProperties(Resource resource) throws IOException {
         return new OriginTrackedPropertiesLoader(resource).load();
+    }
+
+    /**
+     * 获取实例ID生成器
+     * @return
+     */
+    public static String getInstanceIdGeneratorClassName() {
+        if (StringUtils.isNotEmpty(INSTANCE_ID_GENERATOR_CLASSNAME)) {
+            return INSTANCE_ID_GENERATOR_CLASSNAME;
+        }
+        INSTANCE_ID_GENERATOR_CLASSNAME = environment.getProperty(INSTANCE_ID_CONFIG_GENERATOR_KEY);
+        if (StringUtils.isEmpty(INSTANCE_ID_GENERATOR_CLASSNAME)) {
+            INSTANCE_ID_GENERATOR_CLASSNAME = DEFAULT_INSTANCE_ID_GENERATOR_CLASSNAME;
+        }
+        log.info("Instance id generator class name is: {}", INSTANCE_ID_GENERATOR_CLASSNAME);
+        return INSTANCE_ID_GENERATOR_CLASSNAME;
     }
 
 }

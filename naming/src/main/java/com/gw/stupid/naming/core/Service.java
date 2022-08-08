@@ -8,6 +8,10 @@ import com.gw.stupid.naming.consistency.RecordListener;
 import lombok.Data;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author guanwu
@@ -19,7 +23,6 @@ import java.util.*;
 public class Service implements Record, RecordListener<Instances> , Validatable {
 
     private static final String SERVICE_NAME_RULES = "[0-9a-zA-Z@\\.:_-]+";
-
 
     private static final long serialVersionUID = 3557647373400773712L;
 
@@ -34,6 +37,8 @@ public class Service implements Record, RecordListener<Instances> , Validatable 
     private String group;
 
     private Map<String, Object> metaMap;
+
+    private ReadWriteLock lock =  new ReentrantReadWriteLock();
 
     private volatile long lastUpdateTimeMillis = 0;
 
@@ -55,6 +60,22 @@ public class Service implements Record, RecordListener<Instances> , Validatable 
     @Override
     public void onDelete(String key) {
 
+    }
+
+    public boolean tryGetWriteLock(long time, TimeUnit timeUnit) throws InterruptedException {
+        return lock.writeLock().tryLock(time, timeUnit);
+    }
+
+    public boolean tryGetReadLock(long time, TimeUnit timeUnit) throws InterruptedException {
+        return lock.readLock().tryLock(time, timeUnit);
+    }
+
+    public void unlockWriteLock() {
+        lock.writeLock().unlock();
+    }
+
+    public void unlockReadLock() {
+        lock.readLock().unlock();
     }
 
     @Override

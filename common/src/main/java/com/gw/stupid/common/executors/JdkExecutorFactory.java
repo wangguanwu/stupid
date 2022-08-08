@@ -2,6 +2,7 @@ package com.gw.stupid.common.executors;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -27,7 +28,7 @@ public class JdkExecutorFactory implements ExecutorFactory {
     }
 
     @Override
-    public ExecutorService newSingleScheduledExecutorService(ThreadFactory factory) {
+    public ScheduledExecutorService newSingleScheduledExecutorService(ThreadFactory factory) {
         return Executors.newSingleThreadScheduledExecutor(factory);
     }
 
@@ -37,7 +38,7 @@ public class JdkExecutorFactory implements ExecutorFactory {
     }
 
     @Override
-    public ExecutorService newScheduledExecutorService(int nThreads, ThreadFactory factory) {
+    public ScheduledExecutorService newScheduledExecutorService(int nThreads, ThreadFactory factory) {
         return Executors.newScheduledThreadPool(nThreads, factory);
     }
 

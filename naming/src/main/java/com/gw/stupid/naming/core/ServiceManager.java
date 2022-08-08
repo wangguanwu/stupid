@@ -2,6 +2,7 @@ package com.gw.stupid.naming.core;
 
 import com.gw.stupid.common.utils.KeyBuilderUtils;
 import com.gw.stupid.exception.StupidException;
+import com.gw.stupid.exception.runtime.StupidRuntimeException;
 import com.gw.stupid.naming.consistency.CpService;
 import com.gw.stupid.naming.consistency.Datum;
 import com.gw.stupid.naming.consistency.RecordListener;
@@ -14,6 +15,8 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * 管理服务
@@ -61,12 +64,20 @@ public class ServiceManager implements RecordListener<Service>{
             throw new StupidException(StupidException.INVALID_PARAM, namespaceId + ":" + serviceName);
         }
         String key = KeyBuilderUtils.buildInstanceListKey(namespaceId, serviceName, isEphemeral);
-        //todo 优化为可重入读写锁
-        synchronized (service) {
-            List<Instance> toBeAddInstanceList = addInstances(service, isEphemeral, instances);
-            Instances instances1 = new Instances();
-            instances1.setInstanceList(toBeAddInstanceList);
-            cpService.put(key, instances1);
+        try {
+            if (!service.tryGetWriteLock(1, TimeUnit.SECONDS)) {
+                log.warn("Add instance acquire lock failed.serviceName:{}", service);
+                return;
+            }
+            try {
+                List<Instance> toBeAddInstanceList = addInstances(service, isEphemeral, instances);
+                Instances instances1 = new Instances();
+                instances1.setInstanceList(toBeAddInstanceList);
+                cpService.put(key, instances1);
+            } finally {
+                service.unlockWriteLock();
+            }
+        } catch (InterruptedException e) {
         }
     }
 
@@ -114,32 +125,26 @@ public class ServiceManager implements RecordListener<Service>{
 
     private List<Instance> operateInstances(Service service, List<Instance> newInstances, Map<String, Instance> cpMap,
                                            InstanceOperation op) {
-        for (Instance is : newInstances) {
-
-            Instance existInstance = cpMap.get(is.getDatumKey());
-            if (!service.getClusterMap().containsKey(is.getClusterName())) {
-                Cluster cluster = new Cluster(service, is.getClusterName());
+        for (Instance ips : newInstances) {
+            Instance existInstance = cpMap.get(ips.getDatumKey());
+            if (!service.getClusterMap().containsKey(ips.getClusterName())) {
+                Cluster cluster = new Cluster(service, ips.getClusterName());
                 cluster.init();
                 service.getClusterMap().put(cluster.getName(), cluster);
-                log.warn("Cluster not found, ip:{} will create cluster {}", is.getIpAndPort(), cluster.getName());
+                log.warn("Cluster not found, ip:{} will create cluster {}", ips.getIpAndPort(), cluster.getName());
             }
             switch (op) {
                 case DELETE:
-
-                    cpMap.remove(is.getIpAndPort());
+                    cpMap.remove(ips.getDatumKey());
                     break;
-
                 case ADD:
-
                     if (existInstance != null) {
-                        is.setInstanceId(existInstance.getInstanceId());
+                        ips.setInstanceId(existInstance.getInstanceId());
                     } else {
-                        //todo 设置instanceId
-                        is.setInstanceId(null);
+                        ips.setInstanceId(NamingUtils.generateInstanceId(cpMap.keySet()));
                     }
-
                 default:
-                    cpMap.put(is.getDatumKey(), is);
+                    cpMap.put(ips.getDatumKey(), ips);
                     break;
             }
         }
