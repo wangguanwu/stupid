@@ -10,6 +10,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>stupid-consistency</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>com.gw.stupid</groupId>
+            <artifactId>stupid-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.gw.stupid</groupId>
+            <artifactId>stupid-common</artifactId>
+        </dependency>
+    </dependencies>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

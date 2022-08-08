@@ -7,4 +7,7 @@ package com.gw.stupid.common.constants;
 public interface CommonConstants {
 
     String COMMA_DELIMIETER = ",";
+
+    int REQ_SUCCESS = 200;
+
 }
