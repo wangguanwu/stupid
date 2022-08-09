@@ -6,7 +6,7 @@ package com.gw.stupid.consistency;
  *
  * 一致性协议
  **/
-public interface ConsistencyProtocol {
+public interface ConsistencyProtocol<C extends Config, P extends CpRequestProcessor> extends ConsistencyCommand {
 
 
 }

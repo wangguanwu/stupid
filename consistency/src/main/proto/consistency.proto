@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files=true;
+option java_package = "com.gw.stupid.consistency.entity.generator";
+
+message WriteRequest {
+    string group = 1;
+    string key = 2;
+    bytes data = 3;
+    string type = 4;
+    string operation = 5;
+    map<string, string> exInfo = 6;
+}
+
+message ReadRequest {
+    string group = 1;
+    bytes data = 2;
+    map<string, string> exInfo = 3;
+}
+
+message CpResponse {
+    bytes data = 1;
+    string errMsg = 2;
+    bool success = 3;
+}

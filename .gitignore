@@ -14,3 +14,6 @@ work
 test/logs
 yarn.lock
 output
+generator
+/**/src/main/java/com/gw/stupid/../generator/
+

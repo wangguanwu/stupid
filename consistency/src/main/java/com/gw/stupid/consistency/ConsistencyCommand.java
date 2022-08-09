@@ -9,7 +9,7 @@ import java.util.Map;
  * @author guanwu
  * @created on 2022-08-08 16:48:19
  **/
-public interface ExecutableCommand {
+public interface ConsistencyCommand {
 
     default ReqResult<String> executeCommands(Map<String, String> commands) {
         return ReqResultUtils.success();

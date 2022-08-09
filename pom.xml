@@ -490,6 +490,12 @@
                 <artifactId>truth</artifactId>
                 <version>${truth.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${hessian.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
