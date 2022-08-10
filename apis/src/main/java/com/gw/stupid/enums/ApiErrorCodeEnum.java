@@ -9,7 +9,11 @@ public enum ApiErrorCodeEnum {
 
     SUCCESS(200, "ok"),
 
-    ARGS_INVALID(400, "argument invalid");
+    ARGS_INVALID(400, "argument invalid"),
+
+    SERIALIZE_ERROR(600, "serialize error"),
+
+    DESERIALIZE_ERROR(700, "deserialize error");
 
     public final int code;
 
