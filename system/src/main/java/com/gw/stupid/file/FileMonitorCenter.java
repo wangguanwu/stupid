@@ -1,10 +1,10 @@
 package com.gw.stupid.file;
 
-import com.gw.stupid.common.executors.ExecutorUtils;
-import com.gw.stupid.common.executors.NamedThreadFactory;
-import com.gw.stupid.enums.ApiErrorCodeEnum;
-import com.gw.stupid.exception.runtime.StupidRuntimeException;
-import com.gw.stupid.util.ThreadUtils;
+import com.gw.stupid.api.common.executor.ExecutorUtils;
+import com.gw.stupid.api.common.executor.NamedThreadFactory;
+import com.gw.stupid.api.enums.ApiErrorCodeEnum;
+import com.gw.stupid.api.exception.runtime.StupidRuntimeException;
+import com.gw.stupid.api.util.ThreadUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;

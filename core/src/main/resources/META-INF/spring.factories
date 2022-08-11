@@ -1,2 +1,2 @@
 org.springframework.boot.SpringApplicationRunListener=\
-  com.gw.stupid.listener.event.StupidApplicationBootListener
+  com.gw.stupid.core.listener.event.StupidApplicationBootListener

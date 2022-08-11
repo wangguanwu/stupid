@@ -1,7 +1,7 @@
 package com.gw.stupid.consistency;
 
 import com.gw.stupid.consistency.serializer.HessianSerializer;
-import com.gw.stupid.consistency.serializer.JsonSerializer;
+import com.gw.stupid.consistency.snapshot.JsonSerializer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;

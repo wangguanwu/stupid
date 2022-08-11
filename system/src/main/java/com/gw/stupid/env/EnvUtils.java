@@ -1,8 +1,8 @@
 package com.gw.stupid.env;
 
-import com.gw.stupid.common.constants.CommonConstants;
-import com.gw.stupid.common.utils.IOUtils;
-import com.gw.stupid.util.InetUtils;
+import com.gw.stupid.api.common.constant.CommonConstants;
+import com.gw.stupid.api.common.util.IOUtils;
+import com.gw.stupid.api.util.InetUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -49,7 +49,7 @@ public class EnvUtils {
 
     private static final String INSTANCE_ID_CONFIG_GENERATOR_KEY = "instance.id.generator.conf.class.name";
 
-    private static final String DEFAULT_INSTANCE_ID_GENERATOR_CLASSNAME = "com.gw.stupid.common.keygen.SimpleDistributedGenerator";
+    private static final String DEFAULT_INSTANCE_ID_GENERATOR_CLASSNAME = "com.gw.stupid.api.common.keygen.SimpleDistributedGenerator";
 
     private static String INSTANCE_ID_GENERATOR_CLASSNAME = "";
 
