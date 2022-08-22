@@ -13,4 +13,14 @@ public class ReflectKeyGenFactoryTest extends TestCase {
         KeyGenerator keyGenerator = ReflectKeyGenFactory.createKeyGenerator("com.gw.stupid.api.common.keygen.SimpleDistributedGenerator");
         System.out.println(keyGenerator.getType());
     }
+
+    public void testSnowflakeKeyGenerator() throws StupidException {
+        KeyGenerator keyGenerator = ReflectKeyGenFactory.createKeyGenerator("com.gw.stupid.api.common.keygen.SnowflakeKeyGenerator");
+        System.out.println(keyGenerator.generateKey());
+    }
+
+    public void testUUIDGenerator() throws StupidException {
+        KeyGenerator keyGenerator = ReflectKeyGenFactory.createKeyGenerator("com.gw.stupid.api.common.keygen.UUIDShardingKeyGenerator");
+        System.out.println(keyGenerator.generateKey());
+    }
 }
