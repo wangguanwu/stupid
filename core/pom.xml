@@ -55,6 +55,19 @@
             <groupId>com.gw.stupid</groupId>
             <artifactId>stupid-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.gw.stupid</groupId>
+            <artifactId>stupid-consistency</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>jraft-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>rpc-grpc-impl</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

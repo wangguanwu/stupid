@@ -1,8 +1,8 @@
 package com.gw.stupid.consistency;
 
-import com.gw.stupid.consistency.entity.generator.CpResponse;
-import com.gw.stupid.consistency.entity.generator.ReadRequest;
-import com.gw.stupid.consistency.entity.generator.WriteRequest;
+import com.gw.stupid.consistency.entity.auto.CpResponse;
+import com.gw.stupid.consistency.entity.auto.ReadRequest;
+import com.gw.stupid.consistency.entity.auto.WriteRequest;
 
 /**
  * @author guanwu

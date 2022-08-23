@@ -18,8 +18,6 @@ public interface Config<P extends CpRequestProcessor> extends Serializable {
 
     String getSelfMember();
 
-    Set<String> getClusterMembers();
-
     void setValue(String key, String value);
 
     String getValue(String key);

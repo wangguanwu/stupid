@@ -8,7 +8,6 @@ public enum CpDataOperation {
     ADD,
     CHANGE,
     DELETE,
-    VERIFY,
     SNAPSHOT,
-    READ
+    QUERY;
 }

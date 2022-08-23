@@ -26,6 +26,18 @@ public final class ExecutorUtils {
         return DEFAULT_FACTORY.newScheduledExecutorService(nThreads, threadFactory);
     }
 
+    public static ExecutorService newManagedFixedExecutor(String group, int nThreads, ThreadFactory threadFactory) {
+        ExecutorService executorService = DEFAULT_FACTORY.newFixedExecutorService(nThreads, threadFactory);
+        ThreadPoolManager.registerExecutor(group, executorService);
+        return executorService;
+    }
+
+    public static ScheduledExecutorService newManagedScheduledExecutor(String group, int nThreads, ThreadFactory threadFactory) {
+        ScheduledExecutorService scheduledExecutorService = DEFAULT_FACTORY.newScheduledExecutorService(nThreads, threadFactory);
+        ThreadPoolManager.registerExecutor(group, scheduledExecutorService);
+        return scheduledExecutorService;
+    }
+
     public static ExecutorService newExecutor(int nThreads, ThreadFactory threadFactory) {
         return DEFAULT_FACTORY.newFixedExecutorService(nThreads, threadFactory);
     }

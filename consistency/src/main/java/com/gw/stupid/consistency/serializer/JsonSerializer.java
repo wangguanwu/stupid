@@ -1,4 +1,4 @@
-package com.gw.stupid.consistency.snapshot;
+package com.gw.stupid.consistency.serializer;
 
 import com.gw.stupid.api.common.util.JacksonUtils;
 import com.gw.stupid.consistency.Serializer;
