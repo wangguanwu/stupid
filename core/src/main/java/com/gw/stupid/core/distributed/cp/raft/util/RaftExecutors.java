@@ -24,10 +24,15 @@ public final class RaftExecutors {
 
     private static final String OWNER = ClassUtils.getShortCanonicalName(RaftExecutors.class);
 
+    private volatile static boolean isInited = false;
+
     private RaftExecutors()  {
     }
 
     public static void init(RaftConfig raftConfig) {
+        if (isInited) {
+            return;
+        }
         int coreThreadNum = Integer.parseInt(raftConfig.getOrDefault(RaftConstants.RAFT_CORE_THREAD_NUM,
                 "8"));
 
@@ -50,6 +55,27 @@ public final class RaftExecutors {
 
         raftSnapshotExecutor = ExecutorUtils.newManagedFixedExecutor(OWNER, snapshotNum,
                 new NamedThreadFactory("com.gw.stupid.core.raft-snapshot"));
+
+        isInited = true;
     }
 
+    public static ExecutorService getRaftCoreExecutor() {
+        return raftCoreExecutor;
+    }
+
+    public static ScheduledExecutorService getRaftCommonExecutor() {
+        return raftCommonExecutor;
+    }
+
+    public static ExecutorService getRaftCliServiceExecutor() {
+        return raftCliServiceExecutor;
+    }
+
+    public static ExecutorService getRaftSnapshotExecutor() {
+        return raftSnapshotExecutor;
+    }
+
+    public static String getOWNER() {
+        return OWNER;
+    }
 }

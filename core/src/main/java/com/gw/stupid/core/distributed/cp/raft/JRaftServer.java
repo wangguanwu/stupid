@@ -129,6 +129,7 @@ public class JRaftServer {
 
             nodeOptions.setInitialConf(conf);
 
+            //初始化rpcServer
             rpcServer = RaftUtils.createAndInitRpcServer(this, localPeerId);
 
 
