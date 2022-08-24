@@ -35,10 +35,10 @@ public final class Consistency {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ReadRequest_ExInfoEntry_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_CpResponse_descriptor;
+    internal_static_Response_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_CpResponse_fieldAccessorTable;
+      internal_static_Response_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -56,10 +56,10 @@ public final class Consistency {
       "\001\"\203\001\n\013ReadRequest\022\r\n\005group\030\001 \001(\t\022\014\n\004data" +
       "\030\002 \001(\014\022(\n\006exInfo\030\003 \003(\0132\030.ReadRequest.ExI" +
       "nfoEntry\032-\n\013ExInfoEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005" +
-      "value\030\002 \001(\t:\0028\001\";\n\nCpResponse\022\014\n\004data\030\001 " +
-      "\001(\014\022\016\n\006errMsg\030\002 \001(\t\022\017\n\007success\030\003 \001(\010B.\n*" +
-      "com.gw.stupid.consistency.entity.generat" +
-      "orP\001b\006proto3"
+      "value\030\002 \001(\t:\0028\001\"9\n\010Response\022\014\n\004data\030\001 \001(" +
+      "\014\022\016\n\006errMsg\030\002 \001(\t\022\017\n\007success\030\003 \001(\010B)\n%co" +
+      "m.gw.stupid.consistency.entity.autoP\001b\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -89,11 +89,11 @@ public final class Consistency {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ReadRequest_ExInfoEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
-    internal_static_CpResponse_descriptor =
+    internal_static_Response_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_CpResponse_fieldAccessorTable = new
+    internal_static_Response_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_CpResponse_descriptor,
+        internal_static_Response_descriptor,
         new java.lang.String[] { "Data", "ErrMsg", "Success", });
   }
 

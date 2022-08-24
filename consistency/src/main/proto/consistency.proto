@@ -18,7 +18,7 @@ message ReadRequest {
     map<string, string> exInfo = 3;
 }
 
-message CpResponse {
+message Response {
     bytes data = 1;
     string errMsg = 2;
     bool success = 3;

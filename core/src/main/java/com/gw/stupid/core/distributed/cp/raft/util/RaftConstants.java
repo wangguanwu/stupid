@@ -96,10 +96,27 @@ public interface RaftConstants {
 
     int DEFAULT_DISRUPTOR_BUFFER_SIZE = 16384;
 
+    /**
+     * Whether to enable replication of pipeline request optimization, which is enabled by default
+     * pipeline模式优化日志复制请求
+     */
+    String REPLICATOR_PIPELINE = "replicator_pipeline";
 
+    boolean DEFAULT_DEFAULT_REPLICATOR_PIPELINE = true;
 
+    String MAX_REPLICATOR_INFLIGHT_MSGS = "max_replicator_inflight_msgs";
 
+    /**
+     * Maximum in-flight requests with pipeline requests enabled, 256 by default 在启用 pipeline 请求情况下，最大 in-flight
+     * 请求数，默认256
+     */
+    int DEFAULT_MAX_REPLICATOR_INFLIGHT_MSGS = 256;
 
+    String ENABLE_LOG_ENTRY_CHECKSUM = "enable_log_entry_checksum";
 
+    /**
+     * Whether LogEntry checksum is enabled 是否启用 LogEntry checksum
+     */
+    boolean DEFAULT_ENABLE_LOG_ENTRY_CHECKSUM = false;
 
 }

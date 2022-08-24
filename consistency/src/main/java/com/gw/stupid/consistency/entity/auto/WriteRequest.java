@@ -291,7 +291,7 @@ private static final long serialVersionUID = 0L;
         java.lang.String, java.lang.String> defaultEntry =
             com.google.protobuf.MapEntry
             .<java.lang.String, java.lang.String>newDefaultInstance(
-                com.gw.stupid.consistency.entity.auto.Consistency.internal_static_WriteRequest_ExInfoEntry_descriptor,
+                com.gw.stupid.consistency.entity.auto.Consistency.internal_static_WriteRequest_ExInfoEntry_descriptor, 
                 com.google.protobuf.WireFormat.FieldType.STRING,
                 "",
                 com.google.protobuf.WireFormat.FieldType.STRING,
@@ -620,7 +620,7 @@ private static final long serialVersionUID = 0L;
               com.gw.stupid.consistency.entity.auto.WriteRequest.class, com.gw.stupid.consistency.entity.auto.WriteRequest.Builder.class);
     }
 
-    // Construct using com.gw.stupid.consistency.entity.generator.WriteRequest.newBuilder()
+    // Construct using com.gw.stupid.consistency.entity.auto.WriteRequest.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }

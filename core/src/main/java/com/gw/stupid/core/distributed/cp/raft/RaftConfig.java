@@ -71,6 +71,10 @@ public class RaftConfig implements Config<AbstractRequestProcessorForCp> {
         return data.getOrDefault(key, defaultValue);
     }
 
+    public Set<String> getMembers() {
+        return members;
+    }
+
     @Override
     public String toString() {
         try {
@@ -79,4 +83,6 @@ public class RaftConfig implements Config<AbstractRequestProcessorForCp> {
         }
         return "";
     }
+
+
 }

@@ -12,7 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * @author guanwu
  * @created on 2022-08-22 19:08:25
  **/
-public final class JRaftExecutors {
+public final class RaftExecutors {
 
     private static ExecutorService raftCoreExecutor;
 
@@ -22,9 +22,9 @@ public final class JRaftExecutors {
 
     private static ExecutorService raftSnapshotExecutor;
 
-    private static final String OWNER = ClassUtils.getShortCanonicalName(JRaftExecutors.class);
+    private static final String OWNER = ClassUtils.getShortCanonicalName(RaftExecutors.class);
 
-    private JRaftExecutors()  {
+    private RaftExecutors()  {
     }
 
     public static void init(RaftConfig raftConfig) {
