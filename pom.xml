@@ -14,7 +14,7 @@
         <module>consistency</module>
         <module>system</module>
         <module>test</module>
-        <module>apis</module>
+        <module>api</module>
     </modules>
     <groupId>com.gw.stupid</groupId>
     <artifactId>stupid-all</artifactId>
