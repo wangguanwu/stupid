@@ -193,7 +193,7 @@ public class JRaftServer {
 
             NodeOptions copyOpt = nodeOptions.copy();
 
-            initDirectory(parentPath, groupName, copy);
+            RaftUtils.initDirectory(parentPath, groupName, copyOpt);
         }
 
     }
