@@ -1,6 +1,7 @@
 package com.gw.stupid.core.distributed.cp.raft.util;
 
 import com.alipay.sofa.jraft.entity.PeerId;
+import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.alipay.sofa.jraft.rpc.impl.GrpcRaftRpcFactory;
@@ -37,9 +38,9 @@ public class RaftUtils {
 
         marshallerRegistry.registerResponseInstance(WriteRequest.class.getName(), WriteRequest.getDefaultInstance());
 
-        RpcServer rpcServer = grpcRaftRpcFactory.createRpcServer(peerId.getEndpoint());
 
-        RaftRpcServerFactory.addRaftRequestProcessors(rpcServer, RaftExecutors.getRaftCoreExecutor(),
+        //创建RpcServer并添加Raft协议核心处理器
+        RpcServer rpcServer = RaftRpcServerFactory.createRaftRpcServer(peerId.getEndpoint(), RaftExecutors.getRaftCoreExecutor(),
                 RaftExecutors.getRaftCliServiceExecutor());
 
         //注册业务处理器
@@ -47,5 +48,9 @@ public class RaftUtils {
         rpcServer.registerProcessor(new StupidWriteRequestProcessor(jRaftServer, SerializerFactory.getDefault()));
 
         return rpcServer;
+    }
+
+    public static void initDirectory(String parentPath, String group, NodeOptions nodeOptions) {
+
     }
 }

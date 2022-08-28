@@ -12,13 +12,24 @@ import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import com.gw.stupid.api.common.util.ConvertUtils;
 import com.gw.stupid.consistency.Serializer;
 import com.gw.stupid.consistency.SerializerFactory;
+import com.gw.stupid.consistency.cp.ComparableCpRequestProcessor;
+import com.gw.stupid.core.distributed.cp.raft.exception.JRaftDuplicateGroupException;
+import com.gw.stupid.core.distributed.cp.raft.exception.JRaftRuntimeException;
 import com.gw.stupid.core.distributed.cp.raft.util.RaftExecutors;
 import com.gw.stupid.core.distributed.cp.raft.util.RaftConstants;
 import com.gw.stupid.core.distributed.cp.raft.util.RaftOptionsBuildUtils;
 import com.gw.stupid.core.distributed.cp.raft.util.RaftUtils;
+import com.gw.stupid.env.EnvUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+import static com.gw.stupid.core.distributed.cp.raft.util.RaftUtils.*;
 
 /**
  * @author guanwu
@@ -61,6 +72,11 @@ public class JRaftServer {
     private volatile boolean isStarted = false;
 
     private RaftConfig raftConfig;
+
+    // protocol processors
+    Set<ComparableCpRequestProcessor> processors = new ConcurrentSkipListSet<>();
+
+    Map<String, ComparableCpRequestProcessor> raftGroup = new ConcurrentHashMap<>();
 
     public JRaftServer() {
         this.conf = new Configuration();
@@ -117,22 +133,67 @@ public class JRaftServer {
     public synchronized void start() {
 
         if (!isStarted) {
-            log.info("JRaft Server is starting...");
-            NodeManager nodeManager = NodeManager.getInstance();
-            Set<String> members = raftConfig.getMembers();
-            log.info("JRaft集群成员配置: {}", String.join(",",members));
-            for (String member : members) {
-                PeerId peerId = JRaftUtils.getPeerId(member);
-                conf.addPeer(peerId);
-                nodeManager.addAddress(peerId.getEndpoint());
+            try {
+                doStart();
+                isStarted = true;
+            } catch (Exception e) {
+                log.error("Raft 协议启动失败, 原因: ", e.getCause());
+                throw new JRaftRuntimeException(e.getMessage(), e);
+            }
+        }
+
+    }
+
+    private void doStart() {
+        log.info("JRaft Server is starting...");
+        NodeManager nodeManager = NodeManager.getInstance();
+        Set<String> members = raftConfig.getMembers();
+        log.info("JRaft集群成员配置: {}", String.join(",",members));
+        for (String member : members) {
+            PeerId peerId = JRaftUtils.getPeerId(member);
+            conf.addPeer(peerId);
+            nodeManager.addAddress(peerId.getEndpoint());
+        }
+
+        nodeOptions.setInitialConf(conf);
+
+        //初始化rpcServer
+        rpcServer = createAndInitRpcServer(this, localPeerId);
+
+        if (!rpcServer.init(null)) {
+            log.error("初始化RpcServer失败...");
+            throw new RuntimeException("Fail to init the RpcServer.");
+        }
+        createRaftServiceGroups(this.processors);
+        log.info("===========完成启动Raft协议===========");
+    }
+
+    private void registerRaftServiceGroup(Collection<ComparableCpRequestProcessor> processors) {
+        this.processors.addAll( processors);
+        this.createRaftServiceGroups(processors);
+    }
+
+    synchronized void createRaftServiceGroups(Collection<ComparableCpRequestProcessor> processors) {
+
+        if (!isStarted) {
+            log.info("Raft Server 还没初始化.");
+            return;
+        }
+
+        String parentPath = Paths.get(EnvUtils.getStupidHome(), "data/protocol/raft").toString();
+
+        for (ComparableCpRequestProcessor processor : processors) {
+
+            final String groupName = processor.group();
+            if (raftGroup.containsKey(groupName)) {
+                throw new JRaftDuplicateGroupException(String.format("Group name %s exists!", groupName));
             }
 
-            nodeOptions.setInitialConf(conf);
+            Configuration copyConf = conf.copy();
 
-            //初始化rpcServer
-            rpcServer = RaftUtils.createAndInitRpcServer(this, localPeerId);
+            NodeOptions copyOpt = nodeOptions.copy();
 
-
+            initDirectory(parentPath, groupName, copy);
         }
 
     }
