@@ -12,7 +12,7 @@ import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import com.gw.stupid.common.util.ConvertUtils;
 import com.gw.stupid.consistency.Serializer;
 import com.gw.stupid.consistency.SerializerFactory;
-import com.gw.stupid.consistency.cp.ComparableCpRequestProcessor;
+import com.gw.stupid.consistency.cp.AbstractCpRequestProcessor;
 import com.gw.stupid.core.distributed.cp.raft.exception.JRaftDuplicateGroupException;
 import com.gw.stupid.core.distributed.cp.raft.exception.JRaftRuntimeException;
 import com.gw.stupid.core.distributed.cp.raft.util.RaftExecutors;
@@ -74,9 +74,9 @@ public class JRaftServer {
     private RaftConfig raftConfig;
 
     // protocol processors
-    Set<ComparableCpRequestProcessor> processors = new ConcurrentSkipListSet<>();
+    Set<AbstractCpRequestProcessor> processors = new ConcurrentSkipListSet<>();
 
-    Map<String, ComparableCpRequestProcessor> raftGroup = new ConcurrentHashMap<>();
+    Map<String, AbstractCpRequestProcessor> raftGroup = new ConcurrentHashMap<>();
 
     public JRaftServer() {
         this.conf = new Configuration();
@@ -168,12 +168,12 @@ public class JRaftServer {
         log.info("===========完成启动Raft协议===========");
     }
 
-    private void registerRaftServiceGroup(Collection<ComparableCpRequestProcessor> processors) {
+    private void registerRaftServiceGroup(Collection<AbstractCpRequestProcessor> processors) {
         this.processors.addAll( processors);
         this.createRaftServiceGroups(processors);
     }
 
-    synchronized void createRaftServiceGroups(Collection<ComparableCpRequestProcessor> processors) {
+    synchronized void createRaftServiceGroups(Collection<AbstractCpRequestProcessor> processors) {
 
         if (!isStarted) {
             log.info("Raft Server 还没初始化.");
@@ -182,7 +182,7 @@ public class JRaftServer {
 
         String parentPath = Paths.get(EnvUtils.getStupidHome(), "data/protocol/raft").toString();
 
-        for (ComparableCpRequestProcessor processor : processors) {
+        for (AbstractCpRequestProcessor processor : processors) {
 
             final String groupName = processor.group();
             if (raftGroup.containsKey(groupName)) {
@@ -193,7 +193,13 @@ public class JRaftServer {
 
             NodeOptions copyOpt = nodeOptions.copy();
 
+            //初始化group的工作目录
             RaftUtils.initDirectory(parentPath, groupName, copyOpt);
+
+            //初始化状态机
+            StupidStateMachine stupidStateMachine = new StupidStateMachine(this,
+                    processor);
+            //todo
         }
 
     }

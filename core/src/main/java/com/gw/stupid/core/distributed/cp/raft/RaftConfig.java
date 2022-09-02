@@ -2,7 +2,7 @@ package com.gw.stupid.core.distributed.cp.raft;
 
 import com.gw.stupid.common.util.JacksonUtils;
 import com.gw.stupid.consistency.Config;
-import com.gw.stupid.consistency.cp.ComparableCpRequestProcessor;
+import com.gw.stupid.consistency.cp.AbstractCpRequestProcessor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,7 +17,7 @@ import java.util.*;
 
 @Configuration
 @ConfigurationProperties(prefix = "stupid.core.protocol.raft")
-public class RaftConfig implements Config<ComparableCpRequestProcessor> {
+public class RaftConfig implements Config<AbstractCpRequestProcessor> {
 
     private Map<String, String> data = Collections.synchronizedMap(new HashMap<>());
 

@@ -64,7 +64,8 @@ public class RaftUtils {
 
         try {
             FileSystemUtils.forceMakeDir(new File(logUri));
-            DiskUtils
+            FileSystemUtils.forceMakeDir(new File(snapShotUri));
+            FileSystemUtils.forceMakeDir(new File(metaDataUri));
         } catch (Exception e) {
             log.error("Init Raft Directory have some error, cause:", e);
             throw new RuntimeException(e);

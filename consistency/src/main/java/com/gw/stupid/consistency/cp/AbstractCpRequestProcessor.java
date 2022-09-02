@@ -10,7 +10,7 @@ import java.util.List;
  * @author guanwu
  * @created on 2022-08-10 17:00:51
  **/
-public abstract class ComparableCpRequestProcessor implements CpRequestProcessor, Comparable<ComparableCpRequestProcessor> {
+public abstract class AbstractCpRequestProcessor implements CpRequestProcessor, Comparable<AbstractCpRequestProcessor> {
 
 
     public  List<SnapshotOperation> getSnapShotOperation() {
@@ -18,7 +18,7 @@ public abstract class ComparableCpRequestProcessor implements CpRequestProcessor
     }
 
     @Override
-    public int compareTo(ComparableCpRequestProcessor processor) {
+    public int compareTo(AbstractCpRequestProcessor processor) {
         return this.getClass().getName().compareTo(processor.getClass().getName());
     }
 }
