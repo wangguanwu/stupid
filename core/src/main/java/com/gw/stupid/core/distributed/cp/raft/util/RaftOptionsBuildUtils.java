@@ -1,7 +1,7 @@
 package com.gw.stupid.core.distributed.cp.raft.util;
 
 import com.alipay.sofa.jraft.option.RaftOptions;
-import com.gw.stupid.api.common.util.ConvertUtils;
+import com.gw.stupid.common.util.ConvertUtils;
 import com.gw.stupid.core.distributed.cp.raft.RaftConfig;
 
 /**

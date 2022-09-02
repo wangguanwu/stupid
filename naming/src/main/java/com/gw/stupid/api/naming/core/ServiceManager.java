@@ -1,6 +1,6 @@
 package com.gw.stupid.api.naming.core;
 
-import com.gw.stupid.api.common.util.KeyBuilderUtils;
+import com.gw.stupid.common.util.KeyBuilderUtils;
 import com.gw.stupid.api.exception.StupidException;
 import com.gw.stupid.api.naming.consistency.CpService;
 import com.gw.stupid.api.naming.consistency.Datum;

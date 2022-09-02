@@ -1,18 +1,18 @@
 package com.gw.stupid.core.listener.impl;
 
-import com.gw.stupid.api.common.constant.CommonConstants;
-import com.gw.stupid.api.common.executor.ExecutorUtils;
-import com.gw.stupid.api.common.executor.NamedThreadFactory;
-import com.gw.stupid.api.common.executor.ThreadPoolManager;
+import com.gw.stupid.common.constant.CommonConstants;
+import com.gw.stupid.common.executor.ExecutorUtils;
+import com.gw.stupid.common.executor.NamedThreadFactory;
+import com.gw.stupid.common.executor.ThreadPoolManager;
 import com.gw.stupid.api.enums.ApiErrorCodeEnum;
-import com.gw.stupid.env.EnvUtils;
+import com.gw.stupid.sys.env.EnvUtils;
 import com.gw.stupid.api.exception.runtime.StupidRuntimeException;
-import com.gw.stupid.file.AbstractSortableFileChangeListener;
-import com.gw.stupid.file.FileChangeEvent;
-import com.gw.stupid.file.FileMonitorCenter;
+import com.gw.stupid.sys.file.AbstractSortableFileChangeListener;
+import com.gw.stupid.sys.file.FileChangeEvent;
+import com.gw.stupid.sys.file.FileMonitorCenter;
 import com.gw.stupid.core.listener.StupidApplicationRunListener;
-import com.gw.stupid.api.util.FileSystemUtils;
-import com.gw.stupid.api.util.InetUtils;
+import com.gw.stupid.sys.util.FileSystemUtils;
+import com.gw.stupid.sys.util.InetUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.env.OriginTrackedMapPropertySource;
@@ -86,7 +86,7 @@ public class StartingStupidAppRunListener implements StupidApplicationRunListene
             System.setProperty(MODE_PROPERTY_KEY_STAND_MODE, "cluster");
         }
         System.setProperty(STUPID_APPLICATION_VERSION, EnvUtils.getProperty("app.version"));
-        System.setProperty(LOCAL_IP_PROPERTY_KEY, InetUtils.getCurrentPeerIp());
+        System.setProperty(LOCAL_IP_PROPERTY_KEY, InetUtils.getSelfIP());
     }
 
     private void preLoadProperties(ConfigurableEnvironment env) {

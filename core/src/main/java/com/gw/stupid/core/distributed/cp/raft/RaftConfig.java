@@ -1,6 +1,6 @@
 package com.gw.stupid.core.distributed.cp.raft;
 
-import com.gw.stupid.api.common.util.JacksonUtils;
+import com.gw.stupid.common.util.JacksonUtils;
 import com.gw.stupid.consistency.Config;
 import com.gw.stupid.consistency.cp.ComparableCpRequestProcessor;
 import org.springframework.boot.context.properties.ConfigurationProperties;

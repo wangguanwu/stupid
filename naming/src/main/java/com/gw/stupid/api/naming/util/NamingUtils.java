@@ -1,10 +1,10 @@
 package com.gw.stupid.api.naming.util;
 
 
-import com.gw.stupid.api.common.keygen.KeyGenerator;
-import com.gw.stupid.api.common.keygen.ReflectKeyGenFactory;
-import com.gw.stupid.api.common.keygen.SimpleDistributedGenerator;
-import com.gw.stupid.env.EnvUtils;
+import com.gw.stupid.common.keygen.KeyGenerator;
+import com.gw.stupid.common.keygen.ReflectKeyGenFactory;
+import com.gw.stupid.common.keygen.SimpleDistributedGenerator;
+import com.gw.stupid.sys.env.EnvUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;

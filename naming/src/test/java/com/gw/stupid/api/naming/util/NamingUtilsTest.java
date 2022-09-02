@@ -1,6 +1,6 @@
 package com.gw.stupid.api.naming.util;
 
-import com.gw.stupid.env.EnvUtils;
+import com.gw.stupid.sys.env.EnvUtils;
 import junit.framework.TestCase;
 import org.springframework.mock.env.MockEnvironment;
 

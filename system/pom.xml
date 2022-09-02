@@ -17,6 +17,7 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     </properties>
 
     <build>
@@ -42,12 +43,10 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -59,12 +58,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -75,17 +72,8 @@
         </dependency>
         <dependency>
             <groupId>com.gw.stupid</groupId>
-            <artifactId>stupid-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.gw.stupid</groupId>
             <artifactId>stupid-common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.gw.stupid</groupId>
-            <artifactId>stupid-common</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>

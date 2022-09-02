@@ -1,7 +1,7 @@
 package com.gw.stupid.core.distributed.cp.raft.util;
 
-import com.gw.stupid.api.common.executor.ExecutorUtils;
-import com.gw.stupid.api.common.executor.NamedThreadFactory;
+import com.gw.stupid.common.executor.ExecutorUtils;
+import com.gw.stupid.common.executor.NamedThreadFactory;
 import com.gw.stupid.core.distributed.cp.raft.RaftConfig;
 import org.apache.commons.lang3.ClassUtils;
 

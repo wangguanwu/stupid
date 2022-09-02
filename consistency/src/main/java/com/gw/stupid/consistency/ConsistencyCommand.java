@@ -1,7 +1,7 @@
 package com.gw.stupid.consistency;
 
-import com.gw.stupid.api.common.model.ReqResult;
-import com.gw.stupid.api.common.model.ReqResultUtils;
+import com.gw.stupid.common.model.ReqResult;
+import com.gw.stupid.common.model.ReqResultUtils;
 
 import java.util.Map;
 

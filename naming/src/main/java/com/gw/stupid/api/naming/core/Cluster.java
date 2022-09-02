@@ -1,8 +1,8 @@
 package com.gw.stupid.api.naming.core;
 
-import com.gw.stupid.api.common.ExceptionsHelper;
-import com.gw.stupid.api.common.constant.NamingConstants;
-import com.gw.stupid.api.common.validate.Validatable;
+import com.gw.stupid.common.ExceptionsHelper;
+import com.gw.stupid.common.constant.NamingConstants;
+import com.gw.stupid.common.validate.Validatable;
 import com.gw.stupid.api.enums.ApiErrorCodeEnum;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;

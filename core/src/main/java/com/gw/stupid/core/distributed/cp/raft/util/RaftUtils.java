@@ -11,14 +11,21 @@ import com.gw.stupid.consistency.SerializerFactory;
 import com.gw.stupid.consistency.entity.auto.ReadRequest;
 import com.gw.stupid.consistency.entity.auto.Response;
 import com.gw.stupid.consistency.entity.auto.WriteRequest;
+import com.gw.stupid.sys.util.FileSystemUtils;
 import com.gw.stupid.core.distributed.cp.raft.JRaftServer;
 import com.gw.stupid.core.distributed.cp.raft.processor.StupidReadRequestProcessor;
 import com.gw.stupid.core.distributed.cp.raft.processor.StupidWriteRequestProcessor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.File;
+import java.nio.file.Paths;
 
 /**
  * @author guanwu
  * @created on 2022-08-24 16:36:01
  **/
+
+@Slf4j
 public class RaftUtils {
 
     public static RpcServer createAndInitRpcServer(JRaftServer jRaftServer, PeerId peerId) {
@@ -51,6 +58,20 @@ public class RaftUtils {
     }
 
     public static void initDirectory(String parentPath, String group, NodeOptions nodeOptions) {
+        String logUri = Paths.get(parentPath, group, "log").toString();
+        String snapShotUri = Paths.get(parentPath, group, "snapshot").toString();
+        String metaDataUri = Paths.get(parentPath, group, "meta-data").toString();
 
+        try {
+            FileSystemUtils.forceMakeDir(new File(logUri));
+            DiskUtils
+        } catch (Exception e) {
+            log.error("Init Raft Directory have some error, cause:", e);
+            throw new RuntimeException(e);
+        }
+
+        nodeOptions.setLogUri(logUri);
+        nodeOptions.setSnapshotUri(snapShotUri);
+        nodeOptions.setRaftMetaUri(metaDataUri);
     }
 }
