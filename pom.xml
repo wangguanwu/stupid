@@ -204,7 +204,7 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>stupid-sys</artifactId>
+                <artifactId>stupid-system</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

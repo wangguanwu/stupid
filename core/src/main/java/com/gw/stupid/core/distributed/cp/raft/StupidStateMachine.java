@@ -17,6 +17,7 @@ import com.gw.stupid.consistency.snapshot.SnapshotOperation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * JRaft 状态机的实现
@@ -38,6 +39,8 @@ public class StupidStateMachine extends StateMachineAdapter {
 
     private List<RaftSnapshotService> snapshotServices;
 
+    private final ReentrantLock lock = new ReentrantLock();
+
 
     public StupidStateMachine(JRaftServer jRaftServer, AbstractCpRequestProcessor requestProcessor) {
         this.jRaftServer = jRaftServer;
@@ -48,9 +51,18 @@ public class StupidStateMachine extends StateMachineAdapter {
 
     }
 
+    /**
+     * 适配snapshot接口实现类
+     * @param snapshotOperations
+     * @return
+     */
     private List<RaftSnapshotService> getSnapshotAdapterList(List<SnapshotOperation> snapshotOperations) {
+
         List<RaftSnapshotService> res = new ArrayList<>();
         //todo
+        for (SnapshotOperation snapshotOperation : snapshotOperations) {
+          res.add(new RaftSnapShotAdapter(snapshotOperation));
+        }
         return res;
 
     }
@@ -58,8 +70,11 @@ public class StupidStateMachine extends StateMachineAdapter {
 
 
     public void registerSnapShotServices(List<RaftSnapshotService> raftSnapshotServices) {
-        synchronized (snapshotServices) {
+        lock.lock();
+        try {
             this.snapshotServices.addAll(raftSnapshotServices);
+        } finally {
+            lock.unlock();
         }
     }
 

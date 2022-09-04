@@ -1,4 +1,4 @@
-package com.gw.stupid.consistency.serializer;
+package com.gw.stupid.consistency.snapshot;
 
 /**
  * @author guanwu
