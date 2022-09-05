@@ -119,4 +119,11 @@ public interface RaftConstants {
      */
     boolean DEFAULT_ENABLE_LOG_ENTRY_CHECKSUM = false;
 
+    /**
+     * Snapshot interval in seconds
+     */
+    String RAFT_SNAPSHOT_INTERVAL_SECS = "snapshot_interval_secs";
+
+    int DEFAULT_RAFT_SNAPSHOT_INTERVAL_SECS = 30 * 60;
+
 }

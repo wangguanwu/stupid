@@ -7,6 +7,7 @@ import org.apache.commons.lang3.ClassUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author guanwu
@@ -77,5 +78,13 @@ public final class RaftExecutors {
 
     public static String getOWNER() {
         return OWNER;
+    }
+
+    public static void executeByCommon(Runnable r) {
+        raftCommonExecutor.execute(r);
+    }
+
+    public static void scheduledAtFixedRateByCommon(Runnable r, long delay, long period, TimeUnit timeUnit) {
+        raftCommonExecutor.scheduleAtFixedRate(r, delay, period, timeUnit);
     }
 }

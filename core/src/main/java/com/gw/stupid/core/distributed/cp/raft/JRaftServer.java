@@ -9,6 +9,7 @@ import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.option.RaftOptions;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
+import com.gw.stupid.api.util.ExceptionUtils;
 import com.gw.stupid.common.util.ConvertUtils;
 import com.gw.stupid.consistency.Serializer;
 import com.gw.stupid.consistency.SerializerFactory;
@@ -21,13 +22,13 @@ import com.gw.stupid.core.distributed.cp.raft.util.RaftOptionsBuildUtils;
 import com.gw.stupid.core.distributed.cp.raft.util.RaftUtils;
 import com.gw.stupid.sys.env.EnvUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.TimeUnit;
 
 import static com.gw.stupid.core.distributed.cp.raft.util.RaftUtils.*;
 
@@ -60,13 +61,14 @@ public class JRaftServer {
 
     private Integer selfPort;
 
-    PeerId localPeerId;
+    private PeerId localPeerId;
 
-    NodeOptions nodeOptions;
+    private NodeOptions nodeOptions;
 
     private int rpcTimeoutMs;
 
     private CliService cliService;
+
     private CliClientServiceImpl cliClientService;
 
     private volatile boolean isStarted = false;
@@ -74,9 +76,12 @@ public class JRaftServer {
     private RaftConfig raftConfig;
 
     // protocol processors
-    Set<AbstractCpRequestProcessor> processors = new ConcurrentSkipListSet<>();
+    private Set<AbstractCpRequestProcessor> processors = new ConcurrentSkipListSet<>();
 
-    Map<String, AbstractCpRequestProcessor> raftGroup = new ConcurrentHashMap<>();
+    private Map<String, RaftGroupEntity> raftGroup = new ConcurrentHashMap<>();
+
+    private volatile boolean shutdown;
+
 
     public JRaftServer() {
         this.conf = new Configuration();
@@ -84,6 +89,7 @@ public class JRaftServer {
 
     /**
      * 可以参考 https://www.sofastack.tech/projects/sofa-jraft/jraft-user-guide/
+     *
      * @param raftConfig
      */
     public void init(RaftConfig raftConfig) {
@@ -94,7 +100,7 @@ public class JRaftServer {
 
         final String selfAddress = raftConfig.getSelfMember();
 
-        String []info = selfAddress.split(":");
+        String[] info = selfAddress.split(":");
 
         selfIp = info[0];
         selfPort = Integer.parseInt(info[1]);
@@ -148,7 +154,7 @@ public class JRaftServer {
         log.info("JRaft Server is starting...");
         NodeManager nodeManager = NodeManager.getInstance();
         Set<String> members = raftConfig.getMembers();
-        log.info("JRaft集群成员配置: {}", String.join(",",members));
+        log.info("JRaft集群成员配置: {}", String.join(",", members));
         for (String member : members) {
             PeerId peerId = JRaftUtils.getPeerId(member);
             conf.addPeer(peerId);
@@ -168,8 +174,8 @@ public class JRaftServer {
         log.info("===========完成启动Raft协议===========");
     }
 
-    private void registerRaftServiceGroup(Collection<AbstractCpRequestProcessor> processors) {
-        this.processors.addAll( processors);
+    public void registerRaftServiceGroup(Collection<AbstractCpRequestProcessor> processors) {
+        this.processors.addAll(processors);
         this.createRaftServiceGroups(processors);
     }
 
@@ -185,6 +191,7 @@ public class JRaftServer {
         for (AbstractCpRequestProcessor processor : processors) {
 
             final String groupName = processor.group();
+
             if (raftGroup.containsKey(groupName)) {
                 throw new JRaftDuplicateGroupException(String.format("Group name %s exists!", groupName));
             }
@@ -199,8 +206,121 @@ public class JRaftServer {
             //初始化状态机
             StupidStateMachine stupidStateMachine = new StupidStateMachine(this,
                     processor);
-            //todo
+
+            copyOpt.setFsm(stupidStateMachine);
+            copyOpt.setInitialConf(copyConf);
+
+            //设置快照间隔, 默认30*60s做一次snapshot
+            int snapShotInterval = ConvertUtils.toInt(raftConfig.getValue(RaftConstants.RAFT_SNAPSHOT_INTERVAL_SECS),
+                    RaftConstants.DEFAULT_RAFT_SNAPSHOT_INTERVAL_SECS);
+
+            if (CollectionUtils.isEmpty(processor.getSnapShotOperation())) {
+                snapShotInterval = 0;
+            }
+            copyOpt.setSnapshotIntervalSecs(snapShotInterval);
+
+            log.info("Create raft group: {}", groupName);
+            RaftGroupService groupService = new RaftGroupService(groupName, this.localPeerId,
+                    copyOpt);
+
+            Node node = groupService.start(false);
+
+            stupidStateMachine.setNode(node);
+
+            RouteTable.getInstance().updateConfiguration(groupName, this.conf);
+
+            //启动注册本节点到集群的任务
+            startRegisterSelfToClusterTask(groupName, localPeerId, copyConf);
+
+            Random random = new Random();
+            long period = nodeOptions.getElectionTimeoutMs() + random.nextInt(5 * 1000);
+            //启动刷新成员和配置的定时任务
+            startScheduleRefreshMemberTask(groupName, copyOpt.getElectionTimeoutMs(), period);
+
+            this.raftGroup.put(groupName,
+                    RaftGroupEntity.builder()
+                    .raftGroupService(groupService)
+                    .node(node)
+                    .stateMachine(stupidStateMachine)
+                    .requestProcessor(processor).build());
         }
 
+    }
+
+    private void startScheduleRefreshMemberTask(String groupName, long delayMs, long periodMs) {
+        RaftExecutors.scheduledAtFixedRateByCommon(() -> refreshRouteTable(groupName),
+                delayMs, periodMs, TimeUnit.MILLISECONDS);
+    }
+
+
+    private void refreshRouteTable(String groupName) {
+        if (shutdown) {
+            return;
+        }
+
+        try {
+
+            RouteTable instance = RouteTable.getInstance();
+            Configuration configuration = instance.getConfiguration(groupName);
+            log.info("Current configuration is:\n {}", configuration);
+            String oldLeader;
+            PeerId peerId = instance.selectLeader(groupName);
+            if (peerId == null) {
+                oldLeader = PeerId.emptyPeer().getEndpoint().toString();
+            } else {
+                oldLeader = peerId.getEndpoint().toString();
+            }
+
+            log.info("Current leader is:\n {}", oldLeader);
+
+
+            Status status = instance.refreshLeader(cliClientService, groupName, rpcTimeoutMs);
+
+            if (!status.isOk()) {
+                log.error("Failed to refresh leader for the group: {}, status: {}", groupName,
+                        status.getErrorMsg());
+            }
+
+            status = instance.refreshConfiguration(cliClientService, groupName, rpcTimeoutMs);
+
+            if (!status.isOk()) {
+                log.error("Failed to refresh configuration for the group: {}, status: {}", groupName,
+                        status.getErrorMsg());
+            }
+
+        } catch (Exception ex) {
+            log.error("Failed to refresh the leader or configuration for the group: {}, error: {} ", groupName,
+                    ExceptionUtils.getStackTrace(ex));
+        }
+
+    }
+
+    private void startRegisterSelfToClusterTask(String groupName, PeerId localPeerId, Configuration copyConf) {
+        RaftExecutors.executeByCommon(() -> registerSelfToCluster(groupName, localPeerId, conf));
+    }
+
+    private void registerSelfToCluster(String groupName, PeerId peerId, Configuration conf) {
+        if (shutdown) {
+            return;
+        }
+        while(true) {
+            try {
+                if (shutdown) {
+                    break;
+                }
+                List<PeerId> peerIds = cliService.getPeers(groupName, conf);
+                if (peerIds.contains(peerId)) {
+                    break;
+                }
+
+                Status status = cliService.addPeer(groupName, conf, localPeerId);
+                if (status.isOk()) {
+                    log.info("Successfully add the peerId:" + peerId + " in group:" + groupName);
+                    break;
+                }
+            } catch (Exception e) {
+                log.error("Failed to join the cluster. Retry...");
+            }
+        }
     }
 }
